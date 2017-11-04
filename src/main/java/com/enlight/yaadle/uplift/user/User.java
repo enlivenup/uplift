@@ -2,13 +2,12 @@ package com.enlight.yaadle.uplift.user;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
+import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-public class User implements Serializable, Collection<User>{
+public class User implements Serializable, UserDetails{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -30,8 +29,33 @@ public class User implements Serializable, Collection<User>{
 		  this.password=password;
 	  }
 	  
+	  public User(String token) {
+		  super();
+		  this.setToken(token);
+	  }
+	  
+	  public User(String username, String password, boolean enabled, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired,List<GrantedAuthority> authorities) {
+       super();
+       this.username=username;
+       this.password=password;
+       this.enabled=enabled;
+       this.isAccountNonExpired=isAccountNonExpired;
+       this.isAccountNonLocked=isAccountNonLocked;
+       this.isCredentialsNonExpired =isCredentialsNonExpired;
+       authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+       this.authorities=authorities;
+	  }
+
+	  public User(String username, String password, List<GrantedAuthority> authorities) {
+		super();
+		this.username=username;
+	    this.password=password;
+	    this.authorities=authorities;
+	}
+
 	  private String username="";
 	  private String password="";
+	  private String token="";
 	  private String displayname="";
 	  private String email="";
 	  private String address="";
@@ -46,10 +70,23 @@ public class User implements Serializable, Collection<User>{
   	  private String firstName="";
  	  private String familyName="";
  	  private String lastname="";
+ 	  private String skey="";
  	  private boolean enabled=false;
- 	  private Set<String> authorities = new HashSet<String>();
+ 	  private boolean isAccountNonExpired=true;
+ 	  private String role;
+ 	  private List<? extends GrantedAuthority> authorities=null;
+	  private boolean isAccountNonLocked=true;
+ 	  private boolean isCredentialsNonExpired=true;
+ 	  
+ 	  public boolean isAccountNonExpired()                                  {   return isAccountNonExpired;       }
+	  public boolean isAccountNonLocked()                                   { 	return isAccountNonLocked;	      }
+	  public boolean isCredentialsNonExpired()                              {	return isCredentialsNonExpired;	  }
 
-	  public String getUsername()   {  return username;    }
+	  public void setCredentialsNonExpired(boolean isCredentialsNonExpired) { 	this.isCredentialsNonExpired = isCredentialsNonExpired;	}
+	  public void setAccountNonLocked(boolean isAccountNonLocked)           { 	this.isAccountNonLocked = isAccountNonLocked;           }
+	  public void setAccountNonExpired(boolean isAccountNonExpired)         { 	this.isAccountNonExpired = isAccountNonExpired; 	    }
+	  
+ 	  public String getUsername()   {  return username;    }
 	  public String getPassword()   {  return password;    }
 	  public String getDisplayname(){  return displayname; }
 	  public String getEmail()      {  return email;       }
@@ -61,13 +98,17 @@ public class User implements Serializable, Collection<User>{
  	  public String getLogin() 	    {	return login;	   }
  	  public boolean getEnabled() 	{	return enabled;	   }
  	  public Object getLastName()   {   return lastname;   }
+ 	  public String getProfileurl() {	return profileUrl; }
+ 	  public String getKey()        { 	return skey;       }
+ 	  public String getToken()      { 	return token;	   }
  	  
  	  public void setFamilyName(String familyName) 	     				  { this.familyName = familyName;	}
  	  public void setLogin(String login) 			 	 				  {	this.login = login;				}
+ 	  public void setKey(String skey) 			 	 				      {	this.skey = skey;				}
  	  public void setFirstName(String firstName) 		 				  { this.firstName = firstName;		}
  	  public void setLastName(String lastname) 		 				      { this.lastname = lastname;		}
-	  public Set<String> getAuthorities()                 				  { return authorities; 	        }
- 	  public void setAuthorities(Set<String> authorities) 				  { this.authorities = authorities;	}
+ 	  public void setRole(String role)                                    { this.role = role; 		        }
+ 	  public void setToken(String token)                                  {	this.token = token; 		    }
  	  public void setProviderId(String providerId)        				  {	this.providerId = providerId;   }
 	  public void setUsername(String username)            				  { this.username = username;       }
 	  public void setPassword(String password)           				  { this.password = password;       }
@@ -77,99 +118,25 @@ public class User implements Serializable, Collection<User>{
 	  public void setPhone(String phone)                  				  { this.phone = phone;             }
 	  public void setStatus(String status)                				  {	this.status = status;		    } 
 	  public void setImageUrl(String imageUrl)                            { this.imageUrl=imageUrl;         }
-	  public Collection<? extends GrantedAuthority> getRole()             { return roles;  	                }
+	  public String getRole()            								  { return role;  	                }
  	  public void setProfileUrl(String profileUrl) 						  { this.profileUrl =profileUrl;    }
  	  public void setId(String id)                                        { this.id = id; 				    }
  	  public void setEnabled(boolean enabled)							  { this.enabled= enabled;          }
- 	  public void setRole(String role, Collection<? extends GrantedAuthority> roles)                                    { this.roles=roles;	            }
+
+ 	  public void setRole(String role, Collection<? extends GrantedAuthority> roles)          { this.roles=roles;	            }
+ 	  public void setAuthorities(List<? extends GrantedAuthority> authorities) 	              { this.authorities = authorities;	}
  	  
-	  @Override
+ 	  @Override
+ 	  public Collection<? extends GrantedAuthority> getAuthorities() {return null;	}
+
+ 	  @Override
+ 	  public boolean isEnabled() { return true; }
+	  
+ 	  @Override
 	  public String toString() {
-		  return "User [displayname=" + displayname + ", username=" + username + ", login=" + login + ", roles=" + roles + ", password=" + password + ", email=" + email + ", address=" + 
+		  return "User [displayname=" + displayname + ", username=" + username + ", login=" + login + ", roles=" + roles + ", role=" + role + ", password=" + password + ", email=" + email + ", address=" + 
 				        address + ",phone=" + phone +", familyName=" + familyName + ", lastname=" + lastname +", status=" + status + ", id=" + id + ", imageUrl=" + imageUrl + 
-				        ", authorities=" + authorities + ", providerId=" + providerId +", profileUrl=" + profileUrl +"]";
+				        ", authorities=" + authorities + ", providerId=" + providerId + ", token=" + token + ", profileUrl=" + profileUrl +"]";
 	  }
 
-	@Override
-	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean contains(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Iterator<User> iterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean add(User e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean remove(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends User> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	
-
-
-		
-	}
+}

@@ -24,8 +24,6 @@ import com.enlight.yaadle.uplift.user.User;
 import com.enlight.yaadle.uplift.user.UserDao;
 import com.enlight.yaadle.uplift.user.UserDaoImpl;
 
-//import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @SuppressWarnings("unused")
 @Component
@@ -35,8 +33,6 @@ public class YaadleAuthProvider implements AuthenticationProvider {
 	
 	  @Autowired  
 	  UserDao userDao;
-	  //@Autowired  JdbcTemplate jdbcTemplate;
-	  //@Autowired  DataSource dataSource;
 	  
   public YaadleAuthProvider () {}
 	  

@@ -40,10 +40,13 @@ public class RegistrationController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public String postRegistration(HttpServletRequest request, HttpServletResponse response ) {
-	    return "postregister";
-	}
-	
+	public String confirmRegistration(@RequestParam ("token") String token,HttpServletRequest request, HttpServletResponse response,Model model) {
+          logger.info("Confirm Registration for token"  );
+          User user=new User(token);
+          String tokenstatus = userService.validateToken(user);
+          logger.info("Token Verified status:="+ tokenstatus);
+          return "confirmregister";
+}
 		
 }
 

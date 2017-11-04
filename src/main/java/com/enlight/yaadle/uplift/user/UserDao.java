@@ -1,5 +1,7 @@
 package com.enlight.yaadle.uplift.user;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 import com.enlight.yaadle.uplift.user.User;
 
 public interface UserDao {
@@ -9,7 +11,7 @@ public interface UserDao {
 	  public User loadUserByUsername(User login);
 	  public User validateEmail(User login);
 	  User findByEmail(String email);
-	  void save(User user);
-	  void saveRegisteredUser(User user);
-
+	  String save(User user);
+	  public String validateToken(User login);
+	  public UserDetails getUser(String username);
 	}

@@ -16,7 +16,19 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
-  
+ <script type="text/javascript">
+    function Validate() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirmpassword").value;
+        if (password != confirmPassword) {
+            alert("Passwords do not match.");
+            return false;
+        }
+        return true;
+    }
+    
+</script>
+<script> $('#confirmpassword').on('keyup', function () { if ($(this).val() == $('#password').val()) { $('#message').html('matching').css('color', 'green'); } else $('#message').html('not matching').css('color', 'red'); }); </script>
   <style>
 body {
 background-image: url('http://localhost/images/coach.jpeg');
@@ -78,6 +90,8 @@ border-color: #fff !important;
       <span class="input-group-addon"> <img src="/images/gicons/glyphicons-204-lock.png"></span>
       <input type="password" class="form-control" placeholder="Password"  name="password" required>
       <button class="btn btn-success" type="submit" style="margin-left:10px !important;">Login</button>
+      <label style="margin-left:25px;margin-top:">
+       <input type="checkbox" class="form-check" name="remember-me" id="remember"><span style="color:white;margin-left:10px;"> Remember me</span></label>
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
     </div> 
   </form>
@@ -115,23 +129,23 @@ border-color: #fff !important;
   				<input type="password" class="form-control" name="confirmpassword" id="confirmpassword"  placeholder="Confirm Password" required>
 			    </div>
    		        <div class="input-group" style="margin-top:25px;margin-left:25px;" >
-			    <label style="margin-left:25px;margin-top:"><input type="checkbox" class="form-check" name="remember" id="remember"> Remember me</label>
-			    <input type="submit" class="btn btn-success" style="margin-left:25px;width:220px;" value="Submit" onClick="location.href='/home"> 
+			    
+			    <input type="submit" id="btnSubmit" class="btn btn-success btn-block"  value="Click to Confirm Registration" onClick="location.href='/home"> 
                 </div>
                 <hr>
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         </form>
         
         <div id="socialType" class="row" style="margin-top:25px;margin-left:5px;">
-        <form action="/signup/facebook" method="POST">
+        <form action="/signin/facebook" method="POST">
              <button id="fb" type="submit" class="btn btn-outline-primary" style="margin-left:25px;color:#3b5998;">SignUp with <strong>f</strong>acebook</button>
              <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         </form>	
-        <form action="/signup/linkedin" method="POST">
+        <form action="/signin/linkedin" method="POST">
              <button id="ln" type="submit" class="btn btn-outline-primary" style="margin-left:25px;color:#0077B5;">SignUp with linked<strong>in</strong></button>
              <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
          </form>	
-         <form action="/signup/twitter" method="POST">
+         <form action="/signin/twitter" method="POST">
              <button id="tw" type="submit" class="btn btn-outline-primary" style="margin-left:25px;color:#1dcaff;">SignUp with <strong>twitter</strong></button>
              <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
          </form>	 
@@ -143,6 +157,19 @@ border-color: #fff !important;
     </div>
   </div>
 </div>
+ <script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {
+            var password = $("#password").val();
+            var confirmPassword = $("#confirmpassword").val();
+            if (password != confirmPassword) {
+                alert("Passwords do not match.");
+                return false;
+            }
+            return true;
+        });
+    });
+</script>
 </body>
 	</html>
 	
