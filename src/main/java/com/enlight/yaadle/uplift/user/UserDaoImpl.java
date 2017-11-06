@@ -9,13 +9,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+//import java.util.HashMap;
+//import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -63,13 +64,15 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	 
 	// <!-THIS SEGMENT IS FOR REGISTRATION CONTROLLER->
 	public void register(User user) {
-		final String CREATE_USER = "INSERT INTO USERS (username, displayname, email, password, id,enabled) VALUES (?, ?, ?, ? , ?, ?)";
-
+		final String CREATE_USER = "INSERT INTO USERS (username, displayname, email, password, id,enabled,provider) VALUES (?, ?, ?, ? , ?, ?, ?)";
+		final String CREATE_USER_ROLE = "INSERT INTO USERS (username, role) VALUES (?, ?)";
+		
 		UUID uuid = UUID.randomUUID();String randomUUIDString = uuid.toString();String id = randomUUIDString;
 
 		try {
 			String hashPass = StrongPassImpl.generateHash(user.getPassword());
-			int status = jdbcTemplate.update(CREATE_USER, user.getEmail(), user.getUsername(), user.getEmail(), hashPass, id, false);
+			int status = jdbcTemplate.update(CREATE_USER, user.getEmail(), user.getUsername(), user.getEmail(), hashPass, id, false,"LOCAL");
+			int status2 = jdbcTemplate.update(CREATE_USER_ROLE, user.getEmail(),"ROLE_USER");
 			logger.info(
 					"User Updated status: " + status + "\nDisplay UserName: " + user.getUsername() + "\nDisplay Email: "
 							+ user.getEmail() + "\nDisplay Password: " + user.getPassword() + "\nDisplay Id:" + id);
@@ -96,11 +99,17 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 		
 		String pwd  = jdbcTemplate.queryForObject(sql1, String.class, principal.getUsername());
 		String email  = jdbcTemplate.queryForObject(sql2, String.class, principal.getUsername());
-		
+		if(email.equals(null))
+		{
+			HttpServletResponse response;
+			logger.info("User info not found findUserByEmail(null)");
+			principal = null;
+			return principal;
+		}
 	
 		if(email.equals(principal.getUsername()))
 		{
-		logger.info("User info found :=" + email);
+		logger.info("User info found findUserByEmail("+ email+")");
 		try {
 			boolean verify = StrongPassImpl.validatehash(textPass, pwd);
 			logger.info("findUserByEmail Password Match:=" + verify);
@@ -112,7 +121,9 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 			}
 			else 
 			{
-				return null;
+				principal.setUsername(email);
+				principal.setPassword("NOT_MATCHED");
+				return principal;
 			}
  		    }
 		catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -168,7 +179,7 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 	
 	public String save(User user) {
 		
-		final String CREATE_USER = "INSERT INTO USERS (username, displayname, email, password, id,enabled) VALUES (?, ?, ?, ? , ?, ?)";
+		final String CREATE_USER = "INSERT INTO USERS (username, displayname, email, password, id,enabled,provider) VALUES (?, ?, ?, ? , ?, ?,?)";
 		final String SOCIAL_USER = "INSERT INTO USERS_SOCIAL (username,imageurl,profileurl,displayname,skey) VALUES (?, ?, ?, ? , ?)";
 		final String SOCIAL_TOKEN ="";
 		
@@ -176,7 +187,7 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
 
 		try {
 			String hashPass = StrongPassImpl.generateHash(user.getPassword());
-			int status = jdbcTemplate.update(CREATE_USER, user.getEmail(), user.getUsername(), user.getEmail(), hashPass, id, true);
+			int status = jdbcTemplate.update(CREATE_USER, user.getEmail(), user.getUsername(), user.getEmail(), hashPass, id, true,"SOCIAL");
 			logger.info(   "User Updated status: " + status + "\nDisplay UserName: " + user.getUsername() + "\nDisplay Email: "
 							+ user.getEmail() + "\nDisplay Password: " + user.getPassword() + "\nDisplay Id:" + id);
 

@@ -19,11 +19,13 @@ import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.UsersConnectionRepository;
 import org.springframework.social.connect.mem.InMemoryUsersConnectionRepository;
 import org.springframework.social.connect.web.ProviderSignInController;
 
+import com.enlight.yaadle.uplift.handler.YaadleAuthenticationHandler;
 import com.enlight.yaadle.uplift.social.SocialConnectionSignup;
 import com.enlight.yaadle.uplift.social.SocialSignInAdapter;
 import com.enlight.yaadle.uplift.user.UserDaoImpl;
@@ -38,6 +40,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	OAuth2ClientContext oauth2ClientContext;
+	
+	@Autowired
+	OAuth2ClientContextFilter oauth2ClientContextFilter;
 
 	@Autowired
 	private YaadleAuthProvider authProvider;
@@ -57,6 +62,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private SocialConnectionSignup socialConnectionSignup;
 	
+    @Autowired
+    YaadleAuthenticationHandler customSuccessHandler;
+	
     @Override
 	protected void configure(HttpSecurity http) throws Exception {
     	
@@ -64,13 +72,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     	 
     	http.authorizeRequests()
 		        .antMatchers("/", "/home", "/register", "/signin/**", "/signup/**","/login*","/postregister").permitAll()
-		        .antMatchers("/auth/**").permitAll().antMatchers("/resources/**", "/images/**").permitAll()
+		        .antMatchers("/auth/**").permitAll()
+		        .antMatchers("/resources/**", "/images/**","/error").permitAll()
 				.anyRequest().authenticated();
     	
     	 //login configuration
 		 
     	http.formLogin().loginPage("/home").permitAll()
-				.defaultSuccessUrl("/landing")
+				.defaultSuccessUrl("/landing") //.successHandler(customSuccessHandler)
 				.failureUrl("/login?error");
 				
 		 //remember me configuration
@@ -87,7 +96,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     	http.logout().logoutSuccessUrl("/home?logout").permitAll();
 		    
 		// OAUTH FILTER
-    	//http.addFilterAfter(oauth2ClientContextFilter, SecurityContextPersistenceFilter.class);
+    	http.addFilterAfter(oauth2ClientContextFilter, SecurityContextPersistenceFilter.class);
 	}
     
 

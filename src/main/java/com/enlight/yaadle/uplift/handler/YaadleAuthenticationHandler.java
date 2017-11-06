@@ -3,6 +3,7 @@ package com.enlight.yaadle.uplift.handler;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -15,7 +16,9 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 
+@Component 
 public class YaadleAuthenticationHandler implements AuthenticationSuccessHandler {
     protected final Log logger = LogFactory.getLog(this.getClass());
 
@@ -28,9 +31,24 @@ public class YaadleAuthenticationHandler implements AuthenticationSuccessHandler
     // API
 
     @Override
-    public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response, final Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException,IOException {
         handle(request, response, authentication);
         clearAuthenticationAttributes(request);
+        HttpSession session = request.getSession();
+        if (session != null) {
+            String redirectUrl = (String) session.getAttribute("url_prior_login");
+            if (redirectUrl != null) {
+                // we do not forget to clean this attribute from session
+                session.removeAttribute("url_prior_login");
+                // then we redirect
+                getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+            } else {
+                this.onAuthenticationSuccess(request, response, authentication);
+            }
+        }
+        else {
+               this.onAuthenticationSuccess(request, response, authentication);
+             }
     }
 
     // IMPL
@@ -61,11 +79,17 @@ public class YaadleAuthenticationHandler implements AuthenticationSuccessHandler
         }
 
         if (isUser) {
-            return "/homepage.html";
+            return "landing";
         } else if (isAdmin) {
-            return "/console.html";
-        } else {
-            throw new IllegalStateException();
+            return "landing";
+        } else if (null != null)
+        {
+        	return "landing";
+        }
+        else
+        {
+            //throw new IllegalStateException();
+            return "landing";
         }
     }
 

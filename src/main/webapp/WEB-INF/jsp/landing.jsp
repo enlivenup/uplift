@@ -17,6 +17,11 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
   
   <style>
+<script>
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+});
+</script>
 body {
 background-image: url('http://localhost/images/idea.jpeg');
 background-repeat: no-repeat;
@@ -74,7 +79,7 @@ border-color: #fff !important;
         <a class="nav-link">
         <img src="/images/gicons/glyphicons-4-user.png">
         <span class="caret green"></span>
-        <%=request.getSession().getAttribute("username") %>
+        <%=request.getUserPrincipal().getName() %>
         </a></span>
     </li>
  </ul>
